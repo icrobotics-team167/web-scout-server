@@ -5,9 +5,9 @@ part of ws_server;
  */
 
 class UptimeResponse {
-    int uptime;
-    
-    UptimeResponse(this.uptime);
+  int uptime;
+
+  UptimeResponse(this.uptime);
 }
 
 /**
@@ -15,14 +15,14 @@ class UptimeResponse {
  */
 
 class TableMetaResponse {
-    String name;
-    
-    TableMetaResponse(this.name);
-    
-    TableMetaResponse.describing(Table table) : this(table.name);
+  String name;
+
+  TableMetaResponse(this.name);
+
+  TableMetaResponse.describing(Table table) : this(table.name);
 }
 
 class TableCreationRequest {
-    @ApiProperty(required: true)
-    String name;
+  @ApiProperty(required: true)
+  String name;
 }
