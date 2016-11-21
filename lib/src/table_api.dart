@@ -2,7 +2,7 @@ part of ws_server;
 
 class TableApi {
     @ApiMethod(path: 'tables')
-    List<TableMetaResponse> methodTables() => db.tables.map((table) => new TableMetaResponse.describing(table));
+    List<TableMetaResponse> methodTables() => new List.from(db.tables.map((table) => new TableMetaResponse.describing(table)));
     
     @ApiMethod(path: 'tables/create', method: 'POST')
     TableMetaResponse methodTablesCreate(TableCreationRequest req) {

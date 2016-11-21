@@ -10,7 +10,7 @@ class Database {
         // TODO Read table data from disk
     }
     
-    void onShutdown() {
+    void writeToDisk() {
         // TODO Write table data to disk
     }
     
@@ -18,9 +18,13 @@ class Database {
     
     operator [](String name) => _tables[name];
     
-    List<Table> get tables => _tables.values;
+    Iterable<Table> get tables => _tables.values;
     
-    Table createTable(String name) => _tables[name] = new Table(name);
+    Table createTable(String name) {
+        Table created = _tables[name] = new Table(name);
+        writeToDisk();
+        return created;
+    }
 }
 
 class Table {

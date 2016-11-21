@@ -10,9 +10,9 @@ int _startTime;
 final Logger _log = new Logger('wss');
 final ApiServer _api = new ApiServer();
 
-void main(List<String> args) async {
+main(List<String> args) async {
     _startTime = new DateTime.now().millisecondsSinceEpoch;
-    
+
     Logger.root.level = Level.FINEST;
     Logger.root.onRecord.listen((rec) {
         print('${rec.time} [${rec.level.name}] ${rec.loggerName} -- ${rec.message}');
@@ -22,7 +22,7 @@ void main(List<String> args) async {
             print(rec.stackTrace);
     });
     _log.info('Logging initialized.');
-    
+
     _log.info('Initializing database...');
     try {
         db.init("~/.ws_server");
@@ -31,20 +31,7 @@ void main(List<String> args) async {
         exit(1);
     }
     _log.info('Database initialized.');
-    
-    _log.info('Registring shutdown hook...');
-    try {
-        ProcessSignal.SIGTERM.watch().listen(() {
-            _log.info('Shutting down server...');
-            db.onShutdown();
-            _log.info('Shutdown complete.');
-        });
-    } catch (e, trace) {
-        _log.severe('Shutdown hook could not be registered!', e, trace);
-        exit(1);
-    }
-    _log.info('Shutdown hook registered.');
-    
+
     _log.info('Initializing HTTP server...');
     try {
         _api.addApi(new WebScoutServer());
@@ -61,7 +48,7 @@ void main(List<String> args) async {
 class WebScoutServer {
     @ApiResource(name: 'table')
     TableApi tableApi = new TableApi();
-    
+
     @ApiMethod(path: 'uptime')
     UptimeResponse methodUptime() => new UptimeResponse(new DateTime.now().millisecondsSinceEpoch - _startTime);
 }
