@@ -1,0 +1,7 @@
+name: ws_server
+version: 1.0.0
+description: Backend for web-scout
+author: Evan Geng
+homepage: "https://github.com/icrobotics-team167/web-scout-server"
+dependencies:
+    rpc:
