@@ -9,3 +9,4 @@ part 'src/database.dart';
 part 'src/dto.dart';
 part 'src/errors.dart';
 part 'src/table_api.dart';
+part 'src/wrapper.dart';

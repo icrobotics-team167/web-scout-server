@@ -28,7 +28,9 @@ class Database {
 }
 
 class Table {
-  String name;
+  String _name;
 
-  Table(this.name);
+  Table(this._name);
+
+  String get name => _name;
 }
