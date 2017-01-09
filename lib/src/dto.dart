@@ -52,8 +52,7 @@ class RowMutationRequest {
 }
 
 class RowRemovalRequest {
-  @ApiProperty(required: true)
-  int row;
+  // NO-OP
 }
 
 /**

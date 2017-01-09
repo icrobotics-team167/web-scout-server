@@ -3,7 +3,6 @@ library ws_server;
 import 'dart:convert' show JSON;
 import 'dart:io';
 import 'dart:mirrors';
-import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
 import 'package:rpc/rpc.dart';

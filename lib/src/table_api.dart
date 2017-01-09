@@ -6,8 +6,8 @@ class TableApi {
       new List.from(// TODO Implement queries
           db.tables.map((table) => new TableMetaResponse.describing(table)));
 
-  @ApiMethod(path: 'tables/create', method: 'POST')
-  TableMetaResponse methodTablesCreate(TableCreationRequest req) {
+  @ApiMethod(path: 'tables', method: 'PUT')
+  TableMetaResponse methodTablesPut(TableCreationRequest req) {
     if (!tableNameRegexp.hasMatch(req.name))
       throw new BadRequestError('Invalid table name "${req.name}".');
     if (db.tableExists(req.name))
@@ -25,6 +25,16 @@ class TableApi {
     return new TableMetaResponse.describing(db[name]);
   }
 
+  @ApiMethod(path: 'table/{name}', method: 'DELETE')
+  List<TableMetaResponse> methodTableDelete(String name) {
+    if (!db.tableExists(name))
+      throw new NotFoundError('No such table "$name".');
+    db.dropTable(name);
+    db.writeToDisk();
+    return new List.from(
+        db.tables.map((table) => new TableMetaResponse.describing(table)));
+  }
+
   @ApiMethod(path: 'table/{name}/rows')
   List<List<String>> methodTableRows(String name, {String query: ''}) {
     // TODO Implement queries
@@ -33,8 +43,8 @@ class TableApi {
     return db[name].map((r) => r.map((w) => w.toString()).toList()).toList();
   }
 
-  @ApiMethod(path: 'table/{name}/rows/create', method: 'POST')
-  List<String> methodTableRowsCreate(String name, RowCreationRequest req) {
+  @ApiMethod(path: 'table/{name}/rows', method: 'PUT')
+  List<String> methodTableRowsPut(String name, RowCreationRequest req) {
     if (!db.tableExists(name))
       throw new NotFoundError('No such table "$name".');
     Row newRow = db[name].addRow();
@@ -45,6 +55,7 @@ class TableApi {
       }
     } catch (e) {
       newRow.remove();
+      throw new BadRequestError(e.toString());
     }
     db.writeToDisk();
     return newRow.map((w) => w.toString()).toList();
@@ -55,24 +66,23 @@ class TableApi {
     if (!db.tableExists(name))
       throw new NotFoundError('No such table "$name".');
     if (db[name].length <= row)
-      throw new NotFoundError('Table "$name" does not have $row row(s).');
+      throw new NotFoundError('Table "$name" does not have ${row + 1} row(s).');
     return db[name][row].map((w) => w.toString()).toList();
   }
 
-  @ApiMethod(path: 'table/{name}/row/{row}/mutate', method: 'POST')
+  @ApiMethod(path: 'table/{name}/row/{row}', method: 'POST')
   List<String> methodTableRowMutate(
       String name, String row, RowMutationRequest req) {
     // TODO Implement
     throw new NoImplError();
   }
 
-  @ApiMethod(path: 'table/{name}/row/{row}/delete', method: 'POST')
-  List<String> methodTableRowDelete(
-      String name, int row, RowRemovalRequest req) {
+  @ApiMethod(path: 'table/{name}/row/{row}', method: 'DELETE')
+  List<String> methodTableRowDelete(String name, int row) {
     if (!db.tableExists(name))
       throw new NotFoundError('No such table "$name".');
     if (db[name].length <= row)
-      throw new NotFoundError('Table "$name" does not have $row row(s).');
+      throw new NotFoundError('Table "$name" does not have ${row + 1} row(s).');
     db[name].removeRowAt(row);
     db.writeToDisk();
     return db[name].map((r) => r.map((w) => w.toString()).toList()).toList();

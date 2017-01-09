@@ -39,6 +39,10 @@ class Database {
   }
 
   void writeToDisk() {
+    _dbRoot.listSync()
+        .where((fse) => fse is File)
+        .where((f) => f.path.endsWith('.json'))
+        .forEach((f) => f.deleteSync());
     _tables.forEach((name, table) {
       String data = JSON.encode(table.serialized);
       File tableFile = new File("${_dbRoot.path}/$name.json");
@@ -56,6 +60,8 @@ class Database {
     Table created = _tables[name] = new Table(name, header);
     return created;
   }
+
+  Table dropTable(String name) => _tables.remove(name);
 }
 
 class Table extends Iterable<Row> {
