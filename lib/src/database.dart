@@ -17,12 +17,15 @@ class Database {
           .where((fse) => fse is File)
           .where((f) => f.path.endsWith('.dat'));
       Map<String, Map<String, dynamic>> serTables = new Map.fromIterable(files,
-          key: (f) => f.path, value: (f) => msgpack.unpack(f.readAsBytes()));
+          key: (f) => f.path, value: (f) => msgpack.unpack(f.readAsBytesSync()));
       serTables.forEach((name, data) {
+        int sepIndex = name.lastIndexOf(Platform.pathSeparator) + 1;
+        int extIndex = name.lastIndexOf(".dat");
+        String tableName = name.substring(sepIndex, extIndex);
         List<HeaderCell> header = new List();
         data['header'].forEach((h) => header.add(new HeaderCell(h['name'],
             typeByName(h['type']), new DeserializedDomain.from(h['domain']))));
-        Table table = new Table(name, header);
+        Table table = new Table(tableName, header);
         data['rows'].forEach((rowData) {
           Row row = table.addRow();
           for (int i = 0; i < row.length; i++) {
@@ -30,7 +33,7 @@ class Database {
                 header[i]._type, header[i]._type.deserialize(rowData[i]));
           }
         });
-        _tables[name] = table;
+        _tables[tableName] = table;
       });
     }
   }
@@ -76,7 +79,9 @@ class Table extends Iterable<Row> {
     return row;
   }
 
-  Row removeRow(int row) => _rows.removeAt(row);
+  Row removeRowAt(int row) => _rows.removeAt(row);
+
+  bool removeRow(Row row) => _rows.remove(row);
 
   @override
   Iterator<Row> get iterator => _rows.iterator;
@@ -128,6 +133,8 @@ class Row extends Iterable<Wrapper> {
   void operator []=(int column, Wrapper data) {
     _data[column] = data;
   }
+
+  bool remove() => _parent.removeRow(this);
 
   @override
   Iterator<Wrapper> get iterator => _data.iterator;
