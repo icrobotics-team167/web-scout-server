@@ -15,12 +15,12 @@ class Database {
       List<File> files = _dbRoot
           .listSync()
           .where((fse) => fse is File)
-          .where((f) => f.path.endsWith('.dat'));
+          .where((f) => f.path.endsWith('.json'));
       Map<String, Map<String, dynamic>> serTables = new Map.fromIterable(files,
-          key: (f) => f.path, value: (f) => msgpack.unpack(f.readAsBytesSync()));
+          key: (f) => f.path, value: (f) => JSON.decode(f.readAsStringSync()));
       serTables.forEach((name, data) {
         int sepIndex = name.lastIndexOf(Platform.pathSeparator) + 1;
-        int extIndex = name.lastIndexOf(".dat");
+        int extIndex = name.lastIndexOf(".json");
         String tableName = name.substring(sepIndex, extIndex);
         List<HeaderCell> header = new List();
         data['header'].forEach((h) => header.add(new HeaderCell(h['name'],
@@ -40,9 +40,9 @@ class Database {
 
   void writeToDisk() {
     _tables.forEach((name, table) {
-      Uint8List data = msgpack.pack(table.serialized);
-      File tableFile = new File("${_dbRoot.path}/$name.dat");
-      tableFile.writeAsBytesSync(data);
+      String data = JSON.encode(table.serialized);
+      File tableFile = new File("${_dbRoot.path}/$name.json");
+      tableFile.writeAsStringSync(data);
     });
   }
 
