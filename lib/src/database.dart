@@ -39,7 +39,8 @@ class Database {
   }
 
   void writeToDisk() {
-    _dbRoot.listSync()
+    _dbRoot
+        .listSync()
         .where((fse) => fse is File)
         .where((f) => f.path.endsWith('.json'))
         .forEach((f) => f.deleteSync());

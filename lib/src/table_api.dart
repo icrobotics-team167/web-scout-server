@@ -81,15 +81,13 @@ class TableApi {
     List<Wrapper> rowSim = new List(theRow.length);
     try {
       for (int i = 0; i < theRow.length; i++) {
-        rowSim[i] = new Wrapper(
-            theRow.header[i].type,
+        rowSim[i] = new Wrapper(theRow.header[i].type,
             theRow.header[i].type.deserialize(req.data[i]));
       }
     } catch (e) {
       throw new BadRequestError(e.toString());
     }
-    for (int i = 0; i < theRow.length; i++)
-      theRow[i] = rowSim[i];
+    for (int i = 0; i < theRow.length; i++) theRow[i] = rowSim[i];
     db.writeToDisk();
     return theRow.map((w) => w.toString()).toList();
   }
