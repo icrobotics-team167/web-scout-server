@@ -71,10 +71,27 @@ class TableApi {
   }
 
   @ApiMethod(path: 'table/{name}/row/{row}', method: 'POST')
-  List<String> methodTableRowMutate(
-      String name, String row, RowMutationRequest req) {
-    // TODO Implement
-    throw new NoImplError();
+  List<String> methodTableRowPost(
+      String name, int row, RowMutationRequest req) {
+    if (!db.tableExists(name))
+      throw new NotFoundError('No such table "$name".');
+    if (db[name].length <= row)
+      throw new NotFoundError('Table "$name" does not have ${row + 1} row(s).');
+    Row theRow = db[name][row];
+    List<Wrapper> rowSim = new List(theRow.length);
+    try {
+      for (int i = 0; i < theRow.length; i++) {
+        rowSim[i] = new Wrapper(
+            theRow.header[i].type,
+            theRow.header[i].type.deserialize(req.data[i]));
+      }
+    } catch (e) {
+      throw new BadRequestError(e.toString());
+    }
+    for (int i = 0; i < theRow.length; i++)
+      theRow[i] = rowSim[i];
+    db.writeToDisk();
+    return theRow.map((w) => w.toString()).toList();
   }
 
   @ApiMethod(path: 'table/{name}/row/{row}', method: 'DELETE')

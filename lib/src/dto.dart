@@ -46,13 +46,7 @@ class RowCreationRequest {
 
 class RowMutationRequest {
   @ApiProperty(required: true)
-  int row;
-  @ApiProperty(required: true)
   List<String> data;
-}
-
-class RowRemovalRequest {
-  // NO-OP
 }
 
 /**
