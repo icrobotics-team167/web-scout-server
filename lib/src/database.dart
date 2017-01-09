@@ -9,23 +9,22 @@ class Database {
 
   void init(String dbRoot) {
     _dbRoot = new Directory(dbRoot);
-    List<File> files = _dbRoot.listSync()
+    List<File> files = _dbRoot
+        .listSync()
         .where((fse) => fse is File)
         .where((f) => f.path.endsWith('.dat'));
     Map<String, Map<String, dynamic>> serTables = new Map.fromIterable(files,
         key: (f) => f.path, value: (f) => msgpack.unpack(f.readAsBytes()));
     serTables.forEach((name, data) {
       List<HeaderCell> header = new List();
-      data['header'].forEach((h) =>
-        header.add(new HeaderCell(h['name'],
-            typeByName(h['type']),
-            new DeserializedDomain.from(h['domain']))));
+      data['header'].forEach((h) => header.add(new HeaderCell(h['name'],
+          typeByName(h['type']), new DeserializedDomain.from(h['domain']))));
       Table table = new Table(name, header);
       data['rows'].forEach((rowData) {
         Row row = table.addRow();
         for (int i = 0; i < row.length; i++) {
-          row[i] = new Wrapper(header[i]._type,
-              header[i]._type.deserialize(rowData[i]));
+          row[i] = new Wrapper(
+              header[i]._type, header[i]._type.deserialize(rowData[i]));
         }
       });
       _tables[name] = table;
@@ -99,7 +98,7 @@ class HeaderCell<T> {
   DataType<T> get type => _type;
 
   Domain get domain => _domain;
-  
+
   Map<String, dynamic> get serialized {
     Map<String, dynamic> ser = new Map();
     ser['name'] = _name;

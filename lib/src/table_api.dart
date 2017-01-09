@@ -2,8 +2,9 @@ part of ws_server;
 
 class TableApi {
   @ApiMethod(path: 'tables')
-  List<TableMetaResponse> methodTables({String query: ''}) => new List.from( // TODO Implement queries
-      db.tables.map((table) => new TableMetaResponse.describing(table)));
+  List<TableMetaResponse> methodTables({String query: ''}) =>
+      new List.from(// TODO Implement queries
+          db.tables.map((table) => new TableMetaResponse.describing(table)));
 
   @ApiMethod(path: 'tables/create', method: 'POST')
   TableMetaResponse methodTablesCreate(TableCreationRequest req) {
@@ -11,12 +12,8 @@ class TableApi {
       throw new BadRequestError('Invalid table name "${req.name}".');
     if (db.tableExists(req.name))
       throw new ConflictError('Table "${req.name}" already exists.');
-    return new TableMetaResponse.describing(
-        db.createTable(
-            req.name,
-            req.header.map((h) => h.toHeaderCell()).toList()
-        )
-    );
+    return new TableMetaResponse.describing(db.createTable(
+        req.name, req.header.map((h) => h.toHeaderCell()).toList()));
   }
 
   @ApiMethod(path: 'table/{name}')
@@ -27,7 +24,8 @@ class TableApi {
   }
 
   @ApiMethod(path: 'table/{name}/rows')
-  List<List<String>> methodTableRows(String name, {String query: ''}) { // TODO Implement queries
+  List<List<String>> methodTableRows(String name, {String query: ''}) {
+    // TODO Implement queries
     if (!db.tableExists(name))
       throw new NotFoundError('No such table "$name".');
     return db[name].map((r) => r.map((w) => w.toString()).toList()).toList();
@@ -46,7 +44,8 @@ class TableApi {
   }
 
   @ApiMethod(path: 'table/{name}/row/{row}/mutate', method: 'POST')
-  List<String> methodTableRowMutate(String name, String row, RowMutationRequest req) {
+  List<String> methodTableRowMutate(
+      String name, String row, RowMutationRequest req) {
     // TODO Implement
     throw new NoImplError();
   }

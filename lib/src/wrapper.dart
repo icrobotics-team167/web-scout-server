@@ -20,13 +20,15 @@ class Wrapper<T> {
     Symbol typeName = reflect(object).type.qualifiedName;
     if (typeMap.containsKey(typeName))
       return new Wrapper(typeMap[typeName], object);
-    throw new UnsupportedError('${typeName.toString()} is not a wrappable data type!');
+    throw new UnsupportedError(
+        '${typeName.toString()} is not a wrappable data type!');
   }
 
   factory Wrapper.deserialize(String typeName, String data) {
     DataType<T> type = typeByName(typeName);
     if (type == null)
-      throw new UnsupportedError('$typeName is not a deserializable data type!');
+      throw new UnsupportedError(
+          '$typeName is not a deserializable data type!');
     return new Wrapper(type, type.deserialize(data));
   }
 

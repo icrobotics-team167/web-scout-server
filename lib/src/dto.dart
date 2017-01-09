@@ -20,10 +20,12 @@ class TableMetaResponse {
 
   TableMetaResponse(this.name, this.header);
 
-  TableMetaResponse.describing(Table table): this(
-      table.name,
-      table.header.map((h) => new HeaderCellResponse.describing(h)).toList()
-  );
+  TableMetaResponse.describing(Table table)
+      : this(
+            table.name,
+            table.header
+                .map((h) => new HeaderCellResponse.describing(h))
+                .toList());
 }
 
 class TableCreationRequest {
@@ -65,12 +67,8 @@ class HeaderCellRequest {
   String dataType;
   String domain;
 
-  HeaderCell toHeaderCell() =>
-      new HeaderCell(
-          name,
-          typeByName(dataType),
-          domain == null ? domainAcceptAll : new DeserializedDomain.from(domain)
-      );
+  HeaderCell toHeaderCell() => new HeaderCell(name, typeByName(dataType),
+      domain == null ? domainAcceptAll : new DeserializedDomain.from(domain));
 }
 
 class HeaderCellResponse {
