@@ -2,6 +2,7 @@ library ws_server;
 
 import 'dart:convert' show JSON;
 import 'dart:io';
+import 'dart:math' show max, min;
 import 'dart:mirrors';
 
 import 'package:logging/logging.dart';

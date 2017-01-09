@@ -36,11 +36,14 @@ class TableApi {
   }
 
   @ApiMethod(path: 'table/{name}/rows')
-  List<List<String>> methodTableRows(String name, {String query: ''}) {
+  List<List<String>> methodTableRows(
+      String name, {String query: "", int limit = -1}) {
     // TODO Implement queries
     if (!db.tableExists(name))
       throw new NotFoundError('No such table "$name".');
-    return db[name].map((r) => r.map((w) => w.toString()).toList()).toList();
+    List<dynamic> results =
+      db[name].map((r) => r.map((w) => w.toString()).toList()).toList();
+    return limit < 0 ? results : results.sublist(0, min(results.length, limit));
   }
 
   @ApiMethod(path: 'table/{name}/rows', method: 'PUT')
