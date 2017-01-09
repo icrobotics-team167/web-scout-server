@@ -24,7 +24,7 @@ main(List<String> args) async {
 
   _log.info('Initializing database...');
   try {
-    db.init("~/.ws_server");
+    db.init("$osDependentHomeDir${Platform.pathSeparator}.ws_server");
   } catch (e, trace) {
     _log.severe('Database init failed!', e, trace);
     exit(1);
@@ -52,3 +52,6 @@ class WebScoutServer {
   UptimeResponse methodUptime() => new UptimeResponse(
       new DateTime.now().millisecondsSinceEpoch - _startTime);
 }
+
+String get osDependentHomeDir =>
+    Platform.environment[Platform.isWindows ? 'UserProfile' : 'HOME'];

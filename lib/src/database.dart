@@ -9,26 +9,30 @@ class Database {
 
   void init(String dbRoot) {
     _dbRoot = new Directory(dbRoot);
-    List<File> files = _dbRoot
-        .listSync()
-        .where((fse) => fse is File)
-        .where((f) => f.path.endsWith('.dat'));
-    Map<String, Map<String, dynamic>> serTables = new Map.fromIterable(files,
-        key: (f) => f.path, value: (f) => msgpack.unpack(f.readAsBytes()));
-    serTables.forEach((name, data) {
-      List<HeaderCell> header = new List();
-      data['header'].forEach((h) => header.add(new HeaderCell(h['name'],
-          typeByName(h['type']), new DeserializedDomain.from(h['domain']))));
-      Table table = new Table(name, header);
-      data['rows'].forEach((rowData) {
-        Row row = table.addRow();
-        for (int i = 0; i < row.length; i++) {
-          row[i] = new Wrapper(
-              header[i]._type, header[i]._type.deserialize(rowData[i]));
-        }
+    if (!_dbRoot.existsSync()) {
+      _dbRoot.createSync();
+    } else {
+      List<File> files = _dbRoot
+          .listSync()
+          .where((fse) => fse is File)
+          .where((f) => f.path.endsWith('.dat'));
+      Map<String, Map<String, dynamic>> serTables = new Map.fromIterable(files,
+          key: (f) => f.path, value: (f) => msgpack.unpack(f.readAsBytes()));
+      serTables.forEach((name, data) {
+        List<HeaderCell> header = new List();
+        data['header'].forEach((h) => header.add(new HeaderCell(h['name'],
+            typeByName(h['type']), new DeserializedDomain.from(h['domain']))));
+        Table table = new Table(name, header);
+        data['rows'].forEach((rowData) {
+          Row row = table.addRow();
+          for (int i = 0; i < row.length; i++) {
+            row[i] = new Wrapper(
+                header[i]._type, header[i]._type.deserialize(rowData[i]));
+          }
+        });
+        _tables[name] = table;
       });
-      _tables[name] = table;
-    });
+    }
   }
 
   void writeToDisk() {
@@ -47,7 +51,6 @@ class Database {
 
   Table createTable(String name, List<HeaderCell> header) {
     Table created = _tables[name] = new Table(name, header);
-    writeToDisk();
     return created;
   }
 }

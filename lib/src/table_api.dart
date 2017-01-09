@@ -51,7 +51,8 @@ class TableApi {
   }
 
   @ApiMethod(path: 'table/{name}/row/{row}/delete', method: 'POST')
-  List<String> methodTableRowDelete(String name, String row) {
+  List<String> methodTableRowDelete(
+      String name, String row, RowRemovalRequest req) {
     // TODO Implement
     throw new NoImplError();
   }
