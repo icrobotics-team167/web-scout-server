@@ -5,13 +5,39 @@ final Database db = new Database();
 
 class Database {
   Map<String, Table> _tables = new Map();
+  Directory _dbRoot = null;
 
   void init(String dbRoot) {
-    // TODO Read table data from disk
+    _dbRoot = new Directory(dbRoot);
+    List<File> files = _dbRoot.listSync()
+        .where((fse) => fse is File)
+        .where((f) => f.path.endsWith('.dat'));
+    Map<String, Map<String, dynamic>> serTables = new Map.fromIterable(files,
+        key: (f) => f.path, value: (f) => msgpack.unpack(f.readAsBytes()));
+    serTables.forEach((name, data) {
+      List<HeaderCell> header = new List();
+      data['header'].forEach((h) =>
+        header.add(new HeaderCell(h['name'],
+            typeByName(h['type']),
+            new DeserializedDomain.from(h['domain']))));
+      Table table = new Table(name, header);
+      data['rows'].forEach((rowData) {
+        Row row = table.addRow();
+        for (int i = 0; i < row.length; i++) {
+          row[i] = new Wrapper(header[i]._type,
+              header[i]._type.deserialize(rowData[i]));
+        }
+      });
+      _tables[name] = table;
+    });
   }
 
   void writeToDisk() {
-    // TODO Write table data to disk
+    _tables.forEach((name, table) {
+      Uint8List data = msgpack.pack(table.serialized);
+      File tableFile = new File("${_dbRoot.path}/$name.dat");
+      tableFile.writeAsBytesSync(data);
+    });
   }
 
   bool tableExists(String name) => _tables.containsKey(name);
@@ -52,6 +78,13 @@ class Table extends Iterable<Row> {
 
   @override
   Iterator<Row> get iterator => _rows.iterator;
+
+  Map<String, dynamic> get serialized {
+    Map<String, dynamic> ser = new Map();
+    ser['header'] = _header.map((c) => c.serialized).toList();
+    ser['rows'] = _rows.map((r) => r.serialized).toList();
+    return ser;
+  }
 }
 
 class HeaderCell<T> {
@@ -66,6 +99,14 @@ class HeaderCell<T> {
   DataType<T> get type => _type;
 
   Domain get domain => _domain;
+  
+  Map<String, dynamic> get serialized {
+    Map<String, dynamic> ser = new Map();
+    ser['name'] = _name;
+    ser['type'] = _type.name;
+    ser['domain'] = _domain.toString();
+    return ser;
+  }
 }
 
 class Row extends Iterable<Wrapper> {
@@ -82,6 +123,12 @@ class Row extends Iterable<Wrapper> {
 
   Wrapper operator [](int column) => _data[column];
 
+  void operator []=(int column, Wrapper data) {
+    _data[column] = data;
+  }
+
   @override
   Iterator<Wrapper> get iterator => _data.iterator;
+
+  List<dynamic> get serialized => _data.map((d) => d.toString()).toList();
 }

@@ -2,8 +2,10 @@ library ws_server;
 
 import 'dart:io';
 import 'dart:mirrors';
+import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
+import 'package:msgpack/msgpack.dart' as msgpack;
 import 'package:rpc/rpc.dart';
 
 part 'src/database.dart';
