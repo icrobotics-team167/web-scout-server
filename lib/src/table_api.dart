@@ -3,7 +3,7 @@ part of ws_server;
 class TableApi {
   @ApiMethod(path: 'tables')
   List<TableMetaResponse> methodTables({String query: ''}) =>
-      new List.from(// TODO Implement queries
+      new List.from(
           db.tables.map((table) => new TableMetaResponse.describing(table)));
 
   @ApiMethod(path: 'tables', method: 'PUT')
@@ -36,13 +36,18 @@ class TableApi {
   }
 
   @ApiMethod(path: 'table/{name}/rows')
-  List<List<String>> methodTableRows(
-      String name, {String query: "", int limit = -1}) {
-    // TODO Implement queries
+  List<List<String>> methodTableRows(String name,
+      {String query: "", int limit = -1}) {
     if (!db.tableExists(name))
       throw new NotFoundError('No such table "$name".');
-    List<dynamic> results =
-      db[name].map((r) => r.map((w) => w.toString()).toList()).toList();
+    List<dynamic> results;
+    if (query.isEmpty) {
+      results = db[name].toList();
+    } else {
+      Query qTest = new Query.parse(query);
+      results = db[name].where(qTest.matches).toList();
+    }
+    results = results.map((r) => r.map((w) => w.toString()).toList()).toList();
     return limit < 0 ? results : results.sublist(0, min(results.length, limit));
   }
 

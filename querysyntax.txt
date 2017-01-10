@@ -1,9 +1,12 @@
 str = value;    # String equality
-str ~= ^value$; # Regex matching
 fpn = 42;       # Numeral equality
+bln = false;    # Boolean equality
+
+str ~= ^value$; # Regex matching
+
 fpn < 42;       # Numeral less-than
 fpn > 42;       # Numeral greater-than
 fpn <= 42;      # Numeral lte
 fpn >= 42;      # Numeral gte
+
 int % 5;        # Integer divisibility
-bln = false;    # Boolean equality
