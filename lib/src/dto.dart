@@ -35,6 +35,35 @@ class TableCreationRequest {
   List<HeaderCellRequest> header;
 }
 
+class TableInterpRequest {
+  @ApiProperty(required: true)
+  List<String> tables;
+  @ApiProperty(required: true)
+  String column;
+  @ApiProperty(defaultValue: "")
+  String query;
+  @ApiProperty(defaultValue: -1)
+  int limit;
+}
+
+class TableInterpResponse {
+  TableMetaResponse info;
+  List<List<String>> rows;
+
+  TableInterpResponse(Table table, String query, int limit) {
+    info = new TableMetaResponse.describing(table);
+    List<dynamic> results;
+    if (query.isEmpty) {
+      results = table.toList();
+    } else {
+      Query qTest = new Query.parse(query);
+      results = table.where(qTest.matches).toList();
+    }
+    results = results.map((r) => r.map((w) => w.toString()).toList()).toList();
+    rows = limit < 0 ? results : results.sublist(0, min(results.length, limit));
+  }
+}
+
 /**
  * Row data types
  */

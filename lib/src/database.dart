@@ -141,6 +141,20 @@ class Row extends Iterable<Wrapper> {
     _data[column] = data;
   }
 
+  int indexForName(String name) {
+    Iterable<HeaderCell> matches = header.where((h) => h.name == name);
+    return matches.isEmpty ? -1 : header.indexOf(matches.first);
+  }
+
+  Wrapper forName(String name) {
+    int index = indexForName(name);
+    return index == -1 ? null : this[index];
+  }
+
+  void setForName(String name, Wrapper data) {
+    this[indexForName(name)] = data;
+  }
+
   bool remove() => _parent.removeRow(this);
 
   @override

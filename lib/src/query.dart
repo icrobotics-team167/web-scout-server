@@ -13,18 +13,8 @@ class Query {
         return _qTypes[match.group(2)](match.group(1), match.group(3));
       }));
 
-  bool matches(Row row) {
-    return _predicates.every((pred) {
-      HeaderCell cell;
-      try {
-        cell = row.header.where((col) => col.name == pred._name).first;
-      } on StateError {
-        return false;
-      }
-      int column = row.header.indexOf(cell);
-      return pred.matches(row[column]);
-    });
-  }
+  bool matches(Row row) =>
+      _predicates.every((pred) => pred.matches(row.forName(pred._name)));
 }
 
 abstract class QueryPredicate<T> {

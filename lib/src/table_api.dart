@@ -17,6 +17,45 @@ class TableApi {
     return new TableMetaResponse.describing(newTable);
   }
 
+  @ApiMethod(path: 'tables/interpolate', method: 'POST')
+  TableInterpResponse methodTablesInterpolate(TableInterpRequest req) {
+    if (req.tables.isEmpty)
+      throw new BadRequestError("No table specified!");
+    else if (req.column.isEmpty)
+      throw new BadRequestError("No interpolation column specified!");
+    req.tables.forEach((name) {
+      if (!db.tableExists(name))
+        throw new NotFoundError('No such table "$name".');
+      if (!db[name].header.any((h) => h.name == req.column)) {
+        throw new NotFoundError(
+            'Table "$name" does not have column "${req.column}".');
+      }
+    });
+    List<Table> tables = req.tables.map((name) => db[name]).toList();
+    List<HeaderCell> interpHeader = new List();
+    Map<String, Table> fieldMap = new Map();
+    tables.forEach((tbl) =>
+        tbl.header.forEach((hc) {
+          fieldMap[hc.name] = tbl;
+          if (!interpHeader.any((hc2) => hc2.name == hc.name))
+            interpHeader.add(hc);
+        }));
+    Table interp =
+      new Table('${req.column} -> ${req.tables.join(', ')}', interpHeader);
+    tables.first.forEach((r) {
+      dynamic value = r.forName(req.column).value;
+      if (tables.every((tbl) =>
+          tbl.any((r) => r.forName(req.column).value == value))) {
+        Row row = interp.addRow();
+        fieldMap.forEach((col, tbl) {
+          Row src = tbl.firstWhere((r) => r.forName(req.column).value == value);
+          row.setForName(col, src.forName(col));
+        });
+      }
+    });
+    return new TableInterpResponse(interp, req.query, req.limit);
+  }
+
   @ApiMethod(path: 'table/{name}')
   TableMetaResponse methodTable(String name) {
     if (!db.tableExists(name))
