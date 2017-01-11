@@ -34,18 +34,17 @@ class TableApi {
     List<Table> tables = req.tables.map((name) => db[name]).toList();
     List<HeaderCell> interpHeader = new List();
     Map<String, Table> fieldMap = new Map();
-    tables.forEach((tbl) =>
-        tbl.header.forEach((hc) {
+    tables.forEach((tbl) => tbl.header.forEach((hc) {
           fieldMap[hc.name] = tbl;
           if (!interpHeader.any((hc2) => hc2.name == hc.name))
             interpHeader.add(hc);
         }));
     Table interp =
-      new Table('${req.column} -> ${req.tables.join(', ')}', interpHeader);
+        new Table('${req.column} -> ${req.tables.join(', ')}', interpHeader);
     tables.first.forEach((r) {
       dynamic value = r.forName(req.column).value;
-      if (tables.every((tbl) =>
-          tbl.any((r) => r.forName(req.column).value == value))) {
+      if (tables.every(
+          (tbl) => tbl.any((r) => r.forName(req.column).value == value))) {
         Row row = interp.addRow();
         fieldMap.forEach((col, tbl) {
           Row src = tbl.firstWhere((r) => r.forName(req.column).value == value);
